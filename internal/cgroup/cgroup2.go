@@ -19,7 +19,9 @@ func (c *cgroup2) Mount() error {
 	}
 	jailPath := dest + "/jail"
 	if err := os.Mkdir(jailPath, 0700); err != nil {
-		return err
+		if !os.IsExist(err) {
+			return err
+		}
 	}
 	if err := os.WriteFile(jailPath+"/cgroup.procs", []byte("0"), 0); err != nil {
 		return err
@@ -32,7 +34,9 @@ func (c *cgroup2) Mount() error {
 	}
 	runPath := dest + "/run"
 	if err := os.Mkdir(runPath, 0700); err != nil {
-		return err
+		if !os.IsExist(err) {
+			return err
+		}
 	}
 	if err := os.WriteFile(runPath+"/cgroup.subtree_control", []byte("+pids +memory +cpu"), 0); err != nil {
 		return err
