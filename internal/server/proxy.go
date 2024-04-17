@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/netip"
 	"os"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -81,7 +80,7 @@ func (p *proxyServer) runConn(inConn net.Conn) {
 	defer p.connDec(ip)
 
 	chall := pow.GenerateChallenge(p.cfg.Pow)
-	fmt.Fprintf(inConn, "proof of work: curl -sSfL https://pwn.red/pow | sh -s %s\nsolution: ", chall)
+	fmt.Fprintf(inConn, "proof of work:\ncurl -sSfL https://pwn.red/pow | sh -s %s\nsolution: ", chall)
 	r := bufio.NewReader(io.LimitReader(inConn, 1024)) // prevent DoS
 	proof, err := r.ReadString('\n')
 	if err != nil {
@@ -134,8 +133,6 @@ func startProxy(cfg *config.Config, errCh chan<- error) {
 const runPath = "/jail/run"
 
 func execProxy(cfg *config.Config) error {
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
 	if err := privs.DropPrivs(cfg); err != nil {
 		return err
 	}
